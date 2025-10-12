@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>动手学AI_Day1</title>
+    <url>/2025/10/01/%E5%8A%A8%E6%89%8B%E5%AD%A6AI-Day1/</url>
+    <content><![CDATA[Softmax回归从零实现初始化这里使用的Fashion-MNIST数据集图像为28*28，文中视为一个展平的向量，把每个像素看作一个特征。
+Softmax的输出与判定的类别是一样多的，因此构筑成784*10的矩阵，偏置${b}$应该是1*10的向量，把权重W用正态分布初始化，把偏置用0初始化。
+num_inputs = 784 #输出维度num_outputs = 10 #输入维度W = torch.normal(0,0.01,size=(num_inputs,num_outputs),requires_grad = True)b = torch.zeros(num_outputs,requires_grad = True)
+
+normal用于使用正态分布标准化变量，规定向量维度，requires_grad表示需要记录梯度，便于反向传播求导
+
+定义SoftmaxSoftmax由三步组成：
+
+对每个项求幂
+对每一行求和，得到每个样本的规范化常数
+对每一行除以规范化常数，确保结果和为1
+
+$$softmax(X){ij} &#x3D; \frac{ \exp(X{ij}) }{ \sum_k \exp(X_{ik}) }$$
+于是我们根据上述步骤规定：
+def softmax(X):    X_exp = torch.exp(X)    partition = X_exp.sum(1, keepim = True) #轴1是行，0是列    return X_exp / partition
+
+定义模型]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>AI</tag>
+        <tag>机器学习</tag>
+      </tags>
+  </entry>
+</search>
