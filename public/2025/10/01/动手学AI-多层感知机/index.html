@@ -13,7 +13,7 @@
   
   <title>
     
-      动手学AI_Day1 
+      动手学AI_多层感知机 
       
       
       |
@@ -60,23 +60,6 @@
       document.documentElement.setAttribute('color-mode', colorMode)
     }
   </script>
-
-  
-    
-      <script async type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-    
-    <script>
-      MathJax = {
-        tex: {
-          inlineMath: [['$', '$'], ['\\(', '\\)']],
-          displayMath: [['$$', '$$'], ['\\[', '\\]']]
-        },
-        options: {
-          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-        }
-      }
-    </script>
-  
 <!-- hexo injector head_end start -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
 
@@ -94,33 +77,29 @@
         <img no-lazy src="/images/avatar.png" alt="">
       
     </a>
-    <div class="nickname"><a href="/">Wide1k</a></div>
+    <div class="nickname"><a href="/">Oranges</a></div>
   </div>
   <div class="navbar">
     <ul>
       
         <li class="nav-item" data-path="/">
-          <a href="/">主页</a>
+          <a href="/">Home</a>
         </li>
       
         <li class="nav-item" data-path="/archives/">
-          <a href="/archives/">文章</a>
-        </li>
-      
-        <li class="nav-item" data-path="/categories/">
-          <a href="/categories/">分类</a>
+          <a href="/archives/">Archives</a>
         </li>
       
         <li class="nav-item" data-path="/tags/">
-          <a href="/tags/">标签</a>
+          <a href="/tags/">Tags</a>
         </li>
       
         <li class="nav-item" data-path="/friends/">
-          <a href="/friends/">朋友</a>
+          <a href="/friends/">Friends</a>
         </li>
       
         <li class="nav-item" data-path="/about/">
-          <a href="/about/">关于</a>
+          <a href="/about/">About</a>
         </li>
       
     </ul>
@@ -135,6 +114,23 @@
       <div class="flex-container">
         <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
 <!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
 
 
   <!-- clipboard -->
@@ -161,24 +157,13 @@
   <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
   <div class="container post-details" id="post-details">
     <div class="post-content">
-      <div class="post-title">动手学AI_Day1</div>
+      <div class="post-title">动手学AI_多层感知机</div>
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
-          2025-10-01 12:16:03
+          2025-10-12 22:16:43
         </span>
         
-              <span class="post-categories">
-                <i class="iconfont icon-bookmark" title="Categories"></i>
-                
-                <span class="span--category">
-                  <a href="/categories/%E5%AD%A6%E4%B9%A0/" title="学习">
-                    <b>#</b> 学习
-                  </a>
-                </span>
-                
-              </span>
-          
               <span class="post-tags">
                 <i class="iconfont icon-tags mr-10" title="Tags"></i>
                 
@@ -198,46 +183,25 @@
           
       </div>
       <div class="markdown-body">
-        <h1 id="Softmax回归"><a href="#Softmax回归" class="headerlink" title="Softmax回归"></a>Softmax回归</h1><h2 id="从零实现"><a href="#从零实现" class="headerlink" title="从零实现"></a>从零实现</h2><h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>这里使用的Fashion-MNIST数据集图像为28*28，文中视为一个展平的向量，把每个像素看作一个特征。</p>
-<p>Softmax的输出与判定的类别是<strong>一样多的</strong>，因此构筑成784*10的矩阵，偏置${b}$应该是1*10的向量，把权重W用正态分布初始化，把偏置用0初始化。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">num_inputs = <span class="number">784</span> <span class="comment">#输出维度</span></span><br><span class="line">num_outputs = <span class="number">10</span> <span class="comment">#输入维度</span></span><br><span class="line"></span><br><span class="line">W = torch.normal(<span class="number">0</span>,<span class="number">0.01</span>,size=(num_inputs,num_outputs),requires_grad = <span class="literal">True</span>)</span><br><span class="line">b = torch.zeros(num_outputs,requires_grad = <span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>normal用于使用正态分布标准化变量，规定向量维度，requires_grad表示需要记录梯度，便于反向传播求导</p>
-</blockquote>
-<h3 id="定义Softmax"><a href="#定义Softmax" class="headerlink" title="定义Softmax"></a>定义Softmax</h3><p>Softmax由三步组成：</p>
-<ul>
-<li>对每个项求幂</li>
-<li>对每一行求和，得到每个样本的规范化常数</li>
-<li>对每一行除以规范化常数，确保结果和为1</li>
-</ul>
-<p>$$<br>softmax(X)<em>{ij} &#x3D; \frac{ \exp(X</em>{ij}) }{ \sum_k \exp(X_{ik}) }<br>$$</p>
-<p>于是我们根据上述步骤规定：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">softmax</span>(<span class="params">X</span>):</span><br><span class="line">    X_exp = torch.exp(X)</span><br><span class="line">    partition = X_exp.<span class="built_in">sum</span>(<span class="number">1</span>, keepim = <span class="literal">True</span>) <span class="comment">#轴1是行，0是列</span></span><br><span class="line">    <span class="keyword">return</span> X_exp / partition</span><br></pre></td></tr></table></figure>
-
-<h3 id="定义模型"><a href="#定义模型" class="headerlink" title="定义模型"></a>定义模型</h3>
+        <h1 id="多层感知机是什么"><a href="#多层感知机是什么" class="headerlink" title="多层感知机是什么"></a>多层感知机是什么</h1><h2 id="隐藏层"><a href="#隐藏层" class="headerlink" title="隐藏层"></a>隐藏层</h2><p>前面说的线性模型是基于线性假设进行的，但是单纯的线性在真实世界里往往是不合理的，例如通过像素作为特征判断猫和狗，但是图片翻转后猫和狗仍不变，但像素特征改变，因此我们需要加一个或多个<strong>隐藏层</strong>来克服线性模型的限制，这就是<strong>多层感知机（MLP）</strong><br><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/../images/%E9%9A%90%E8%97%8F%E5%B1%82.png" alt="alt text"><br>如图，该多层感知机有4个输入，3个输出，5个隐藏单元，中间是全连接层。（层数为2，是全连接的，因为输入层不涉及运算）</p>
+<h2 id="线性到非线性"><a href="#线性到非线性" class="headerlink" title="线性到非线性"></a>线性到非线性</h2>
       </div>
       
         <div class="prev-or-next">
           <div class="post-foot-next">
             
+              <a href="/2025/10/01/%E5%8A%A8%E6%89%8B%E5%AD%A6AI-%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>Prev</span>
+              </a>
+            
           </div>
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
-              2025-10-01 12:16:03
+              2025-10-12 22:16:43
             </span>
             
-                  <span class="post-categories">
-                    <i class="iconfont icon-bookmark" title="Categories"></i>
-                    
-                    <span class="span--category">
-                      <a href="/categories/%E5%AD%A6%E4%B9%A0/" title="学习">
-                        <b>#</b> 学习
-                      </a>
-                    </span>
-                    
-                  </span>
-              
                   <span class="post-tags">
                     <i class="iconfont icon-tags mr-10" title="Tags"></i>
                     
@@ -270,7 +234,7 @@
     <div class="title">Contents</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Softmax%E5%9B%9E%E5%BD%92"><span class="toc-text">Softmax回归</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E9%9B%B6%E5%AE%9E%E7%8E%B0"><span class="toc-text">从零实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89Softmax"><span class="toc-text">定义Softmax</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%9E%8B"><span class="toc-text">定义模型</span></a></li></ol></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">多层感知机是什么</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%90%E8%97%8F%E5%B1%82"><span class="toc-text">隐藏层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BA%BF%E6%80%A7%E5%88%B0%E9%9D%9E%E7%BA%BF%E6%80%A7"><span class="toc-text">线性到非线性</span></a></li></ol></li></ol>
       
     </div>
   </div>
@@ -359,7 +323,7 @@
           </a>
         </span>
         
-          <input type="text" class="search-input" id="search-input" placeholder="搜索...">
+          <input type="text" class="search-input" id="search-input" placeholder="Search...">
         
         <span class="search-close-icon" id="search-close-icon">
           <a href="javascript: void(0)">
@@ -558,12 +522,12 @@
       </a>
       <div class="share-content hidden">
         
-          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + %E5%8A%A8%E6%89%8B%E5%AD%A6AI_Day1 + '&url=' + http%3A%2F%2Flocalhost%3A4000%2F2025%2F10%2F01%2F%25E5%258A%25A8%25E6%2589%258B%25E5%25AD%25A6AI-Day1%2F + '" target="_blank" title="Twitter">
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + %E5%8A%A8%E6%89%8B%E5%AD%A6AI_%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA + '&url=' + http%3A%2F%2Flocalhost%3A4000%2F2025%2F10%2F01%2F%25E5%258A%25A8%25E6%2589%258B%25E5%25AD%25A6AI-%25E5%25A4%259A%25E5%25B1%2582%25E6%2584%259F%25E7%259F%25A5%25E6%259C%25BA%2F + '" target="_blank" title="Twitter">
             <i class="iconfont icon-twitter"></i>
           </a>
         
         
-          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://localhost:4000/2025/10/01/%E5%8A%A8%E6%89%8B%E5%AD%A6AI-Day1/" target="_blank" title="Facebook">
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://localhost:4000/2025/10/01/%E5%8A%A8%E6%89%8B%E5%AD%A6AI-%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/" target="_blank" title="Facebook">
             <i class="iconfont icon-facebooksquare"></i>
           </a>
         

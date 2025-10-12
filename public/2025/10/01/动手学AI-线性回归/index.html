@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="John Doe" />
+  <!-- Open Graph Description 简短摘要-->
+  
+  <!-- 用于搜索引擎的文章摘要 -->
+  
+  
+  
+  <title>
+    
+      动手学AI_线性回归 
+      
+      
+      |
+    
+     Wide1k
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/favicon.png">
+    <link rel="icon" href="/images/favicon.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img no-lazy src="/images/avatar.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/">Oranges</a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">Archives</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="nav-item" data-path="/friends/">
+          <a href="/friends/">Friends</a>
+        </li>
+      
+        <li class="nav-item" data-path="/about/">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">动手学AI_线性回归</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
+          2025-10-12 22:16:43
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="Tags"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/AI/" title="AI">
+                    #AI
+                  </a>
+                </span>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" title="机器学习">
+                    #机器学习
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h1 id="Softmax回归"><a href="#Softmax回归" class="headerlink" title="Softmax回归"></a>Softmax回归</h1><h2 id="从零实现"><a href="#从零实现" class="headerlink" title="从零实现"></a>从零实现</h2><h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>这里使用的Fashion-MNIST数据集图像为28*28，文中视为一个展平的向量，把每个像素看作一个特征。</p>
+<p>Softmax的输出与判定的类别是<strong>一样多的</strong>，因此构筑成784*10的矩阵，偏置${b}$应该是1*10的向量，把权重W用正态分布初始化，把偏置用0初始化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">num_inputs = <span class="number">784</span> <span class="comment">#输出维度</span></span><br><span class="line">num_outputs = <span class="number">10</span> <span class="comment">#输入维度</span></span><br><span class="line"></span><br><span class="line">W = torch.normal(<span class="number">0</span>,<span class="number">0.01</span>,size=(num_inputs,num_outputs),requires_grad = <span class="literal">True</span>)</span><br><span class="line">b = torch.zeros(num_outputs,requires_grad = <span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>normal用于使用正态分布标准化变量，规定向量维度，requires_grad表示需要记录梯度，便于反向传播求导</p>
+</blockquote>
+<h3 id="定义Softmax"><a href="#定义Softmax" class="headerlink" title="定义Softmax"></a>定义Softmax</h3><p>Softmax由三步组成：</p>
+<ul>
+<li>对每个项求幂</li>
+<li>对每一行求和，得到每个样本的规范化常数</li>
+<li>对每一行除以规范化常数，确保结果和为1</li>
+</ul>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/../images/image.png" alt="alt text"></p>
+<p>于是我们根据上述步骤规定：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">softmax</span>(<span class="params">X</span>):</span><br><span class="line">    X_exp = torch.exp(X)</span><br><span class="line">    partition = X_exp.<span class="built_in">sum</span>(<span class="number">1</span>, keepim = <span class="literal">True</span>) <span class="comment">#轴1是行，0是列</span></span><br><span class="line">    <span class="keyword">return</span> X_exp / partition</span><br></pre></td></tr></table></figure>
+
+<h3 id="定义模型"><a href="#定义模型" class="headerlink" title="定义模型"></a>定义模型</h3><p>模型，对应的就是输入如何通过映射到输出，这里我们是把像素点当作特征，那么我们就用reshape将原始图像转为向量。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">net</span>(<span class="params">X</span>):</span><br><span class="line">    <span class="keyword">return</span> softmax(torch.matul(X.reshape((-<span class="number">1</span>,W.shape[<span class="number">0</span>]),W)+b))</span><br></pre></td></tr></table></figure>
+
+<h3 id="定义损失函数"><a href="#定义损失函数" class="headerlink" title="定义损失函数"></a>定义损失函数</h3><p>使用交叉熵损失函数来进行定义损失。我们先创建一个数据样本y_hat，包含2个样本在3个类别的预测概率，以及对应的标签y。我们规定标签y在第一个样本中，第一类是正确的预测； 而在第二个样本中，第三类是正确的预测。然后使用y作为y_hat中概率的索引， 我们选择第一个样本中第一个类的概率和第二个样本中第三个类的概率。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">y = torch.tensor([<span class="number">0</span>, <span class="number">2</span>])</span><br><span class="line">y_hat = torch.tensor([[<span class="number">0.1</span>, <span class="number">0.3</span>, <span class="number">0.6</span>], [<span class="number">0.3</span>, <span class="number">0.2</span>, <span class="number">0.5</span>]])</span><br><span class="line">y_hat[[<span class="number">0</span>, <span class="number">1</span>], y]</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这里用到了高级索引，y_hat[[0, 1], y] 相当于“从第0行取第 y[0] 个元素，从第1行取第 y[1] 个元素”</p>
+</blockquote>
+<p>下面我们定义交叉熵损失：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">cross_entropy</span>(<span class="params">y_hat, y</span>):</span><br><span class="line">    <span class="keyword">return</span> - torch.log(y_hat[<span class="built_in">range</span>(<span class="built_in">len</span>(y_hat)), y])</span><br></pre></td></tr></table></figure>
+<p>交叉熵损失为：<br><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI0IiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgaWQ9InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAiIGF0dHJpYnV0ZU5hbWU9InIiIGJlZ2luPSIwO3N2Z1NwaW5uZXJzM0RvdHNTY2FsZTEuZW5kLTAuMjVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9ImN1cnJlbnRDb2xvciI+PGFuaW1hdGUgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNnMiIGR1cj0iMC43NXMiIHZhbHVlcz0iMzsuMjszIi8+PC9jaXJjbGU+PGNpcmNsZSBjeD0iMjAiIGN5PSIxMiIgcj0iMyIgZmlsbD0iY3VycmVudENvbG9yIj48YW5pbWF0ZSBpZD0ic3ZnU3Bpbm5lcnMzRG90c1NjYWxlMSIgYXR0cmlidXRlTmFtZT0iciIgYmVnaW49InN2Z1NwaW5uZXJzM0RvdHNTY2FsZTAuZW5kLTAuNDVzIiBkdXI9IjAuNzVzIiB2YWx1ZXM9IjM7LjI7MyIvPjwvY2lyY2xlPjwvc3ZnPg==" data-original="/../images/%E5%8A%A8%E6%89%8B%E5%AD%A6day1_crossloss.png" alt="alt text"></p>
+<h3 id="分类精度"><a href="#分类精度" class="headerlink" title="分类精度"></a>分类精度</h3><p>我们上面已经给出了y_hat的预测分类，下面要看分类的精度如何。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">accuracy</span>(<span class="params">y_hat, y</span>):  </span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算预测正确的数量&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(y_hat.shape) &gt; <span class="number">1</span> <span class="keyword">and</span> y_hat.shape[<span class="number">1</span>] &gt; <span class="number">1</span>: <span class="comment">#如果是高纬，就取最大值作为下标判断类别</span></span><br><span class="line">        y_hat = y_hat.argmax(axis=<span class="number">1</span>)</span><br><span class="line">    cmp = y_hat.<span class="built_in">type</span>(y.dtype) == y <span class="comment">#比较是否相等</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">float</span>(cmp.<span class="built_in">type</span>(y.dtype).<span class="built_in">sum</span>()) <span class="comment">#返回相等的个数</span></span><br></pre></td></tr></table></figure>
+<p>下面判断在整个数据集上评估模型的准确率：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">evaluate_accuracy</span>(<span class="params">net,data_iter</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(net,torch.nn.Moudle):</span><br><span class="line">        net.<span class="built_in">eval</span>() <span class="comment">#把模型设置为评估模式，关闭dropout，batchnorm等训练行为</span></span><br><span class="line">    metric = Accumlator(<span class="number">2</span>) <span class="comment">#正确预测数、预测总数</span></span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        <span class="keyword">for</span> X,y <span class="keyword">in</span> data_iter:</span><br><span class="line">            metric.add(accuracy(net(X),y),y.numel())</span><br><span class="line">    <span class="keyword">return</span> metric[<span class="number">0</span>] / metric[<span class="number">1</span>]</span><br></pre></td></tr></table></figure>
+<p>这里的Accumulator是</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Accumulator</span>:  <span class="comment">#@save</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;在n个变量上累加&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, n</span>):</span><br><span class="line">        <span class="variable language_">self</span>.data = [<span class="number">0.0</span>] * n</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">self, *args</span>):</span><br><span class="line">        <span class="variable language_">self</span>.data = [a + <span class="built_in">float</span>(b) <span class="keyword">for</span> a, b <span class="keyword">in</span> <span class="built_in">zip</span>(<span class="variable language_">self</span>.data, args)]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">reset</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="variable language_">self</span>.data = [<span class="number">0.0</span>] * <span class="built_in">len</span>(<span class="variable language_">self</span>.data)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, idx</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.data[idx]</span><br></pre></td></tr></table></figure>
+<p>用于对多个变量进行累加,我们在Accumulator实例中创建了2个变量， 分别用于存储正确预测的数量和预测的总数量。 当我们遍历数据集时，两者都将随着时间的推移而累加。</p>
+<h3 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">train_epoch_ch3</span>(<span class="params">net, train_iter, loss, updater</span>):  <span class="comment">#@save</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;训练模型一个迭代周期（定义见第3章）&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 将模型设置为训练模式</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(net, torch.nn.Module):</span><br><span class="line">        net.train()</span><br><span class="line">    <span class="comment"># 训练损失总和、训练准确度总和、样本数</span></span><br><span class="line">    metric = Accumulator(<span class="number">3</span>)</span><br><span class="line">    <span class="keyword">for</span> X, y <span class="keyword">in</span> train_iter:</span><br><span class="line">        <span class="comment"># 计算梯度并更新参数</span></span><br><span class="line">        y_hat = net(X)</span><br><span class="line">        l = loss(y_hat, y)</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">isinstance</span>(updater, torch.optim.Optimizer):</span><br><span class="line">            <span class="comment"># 使用PyTorch内置的优化器和损失函数</span></span><br><span class="line">            updater.zero_grad()</span><br><span class="line">            l.mean().backward()</span><br><span class="line">            updater.step()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># 使用定制的优化器和损失函数</span></span><br><span class="line">            l.<span class="built_in">sum</span>().backward()</span><br><span class="line">            updater(X.shape[<span class="number">0</span>])</span><br><span class="line">        metric.add(<span class="built_in">float</span>(l.<span class="built_in">sum</span>()), accuracy(y_hat, y), y.numel())</span><br><span class="line">    <span class="comment"># 返回训练损失和训练精度</span></span><br><span class="line">    <span class="keyword">return</span> metric[<span class="number">0</span>] / metric[<span class="number">2</span>], metric[<span class="number">1</span>] / metric[<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+
+<h2 id="简洁实现"><a href="#简洁实现" class="headerlink" title="简洁实现"></a>简洁实现</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"><span class="keyword">from</span> d2l <span class="keyword">import</span> torch <span class="keyword">as</span> d2l</span><br><span class="line"></span><br><span class="line">batch_size = <span class="number">256</span></span><br><span class="line">train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size)</span><br><span class="line"><span class="comment"># PyTorch不会隐式地调整输入的形状。因此，</span></span><br><span class="line"><span class="comment"># 我们在线性层前定义了展平层（flatten），来调整网络输入的形状</span></span><br><span class="line">net = nn.Sequential(nn.Flatten(), nn.Linear(<span class="number">784</span>, <span class="number">10</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">init_weights</span>(<span class="params">m</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">type</span>(m) == nn.Linear:</span><br><span class="line">        nn.init.normal_(m.weight, std=<span class="number">0.01</span>)</span><br><span class="line"></span><br><span class="line">net.apply(init_weights);</span><br><span class="line">loss = nn.CrossEntropyLoss(reduction=<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line">trainer = torch.optim.SGD(net.parameters(), lr=<span class="number">0.1</span>)</span><br><span class="line">num_epochs = <span class="number">10</span></span><br><span class="line">d2l.train_ch3(net, train_iter, test_iter, loss, num_epochs, trainer)</span><br></pre></td></tr></table></figure>
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
+              2025-10-12 22:16:43
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="Tags"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/AI/" title="AI">
+                        #AI
+                      </a>
+                    </span>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" title="机器学习">
+                        #机器学习
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/2025/10/01/%E5%8A%A8%E6%89%8B%E5%AD%A6AI-%E5%A4%9A%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA/" target="_self">
+                <span>Next</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">Contents</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Softmax%E5%9B%9E%E5%BD%92"><span class="toc-text">Softmax回归</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E9%9B%B6%E5%AE%9E%E7%8E%B0"><span class="toc-text">从零实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89Softmax"><span class="toc-text">定义Softmax</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%9E%8B"><span class="toc-text">定义模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="toc-text">定义损失函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E7%B1%BB%E7%B2%BE%E5%BA%A6"><span class="toc-text">分类精度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83"><span class="toc-text">训练</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E6%B4%81%E5%AE%9E%E7%8E%B0"><span class="toc-text">简洁实现</span></a></li></ol></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          
+              <a title="github" target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">
+                <i class="iconfont icon-github"></i>
+              </a>
+              
+        </li>
+        
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Copyright © 2025 Oranges</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+</div>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="Search...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>First search, index file loading, please wait...<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>No result<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>The search.xml file was not found, please refer to：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>The request failed, Try to refresh the page or try again later.<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+  
+    <div class="share-icon tools-bar-item">
+      <a href="javascript: void(0)" id="share-icon">
+        <i class="iconfont iconshare"></i>
+      </a>
+      <div class="share-content hidden">
+        
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + %E5%8A%A8%E6%89%8B%E5%AD%A6AI_%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92 + '&url=' + http%3A%2F%2Flocalhost%3A4000%2F2025%2F10%2F01%2F%25E5%258A%25A8%25E6%2589%258B%25E5%25AD%25A6AI-%25E7%25BA%25BF%25E6%2580%25A7%25E5%259B%259E%25E5%25BD%2592%2F + '" target="_blank" title="Twitter">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        
+        
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://localhost:4000/2025/10/01/%E5%8A%A8%E6%89%8B%E5%AD%A6AI-%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/" target="_blank" title="Facebook">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        
+      </div>
+    </div>
+  
+  
+<script src="/js/shares.js"></script>
+
+
+
+      </div>
+    </div>
+  
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z\d\-\.\+]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(t.test(e.href)||r.test(e.href))&&(e.href=a.dataset.original)})});</script><script>(r=>{r.imageLazyLoadSetting.processImages=t;var a=r.imageLazyLoadSetting.isSPA,o=r.imageLazyLoadSetting.preloadRatio||1,d=i();function i(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(t){(a||t)&&(d=i());for(var e,n=0;n<d.length;n++)0<=(e=(e=d[n]).getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(r.innerHeight*o||document.documentElement.clientHeight*o)&&(()=>{var t,e,a,o,i=d[n];e=function(){d=d.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).dataset.loaded||(t.hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(a=new Image,o=t.getAttribute("data-original"),a.onload=function(){t.src=o,t.removeAttribute("data-original"),t.setAttribute("data-loaded",!0),e&&e()},a.onerror=function(){t.removeAttribute("data-original"),t.setAttribute("data-loaded",!1),t.src=o},t.src!==o&&(a.src=o)))})()}function e(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",e),r.addEventListener("resize",e),r.addEventListener("orientationchange",e)})(this);</script></body>
+</html>
