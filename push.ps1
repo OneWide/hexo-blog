@@ -1,4 +1,4 @@
-# push_auto.ps1
+﻿# push_auto.ps1
 $commitMsg = "Auto update on $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 git add .
 git commit -m "$commitMsg"
